@@ -1,0 +1,178 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ubuntu 20.04 下VSCode编译并烧录Harmony源码（Neptune w800开发版）</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><p>昨天写过一篇文章，是在<font color="green"><strong>命令行编译</strong></font>，使用命令行串口工具<font color="orange"><strong>minicom</strong></font>烧录的。有点小麻烦。</p>
+<p>推荐大家先试用上述方法试一试，里面要安装的依赖也在文章里面。<a href="https://blog.csdn.net/weixin_43764974/article/details/124052484?spm=1001.2014.3001.5501">文章链接</a></p>
+<p>鸿蒙Dev Device Tool本身就是VSCode的一个扩展，在VSCode中试用图形界面一站式开发更加快捷。</p>
+<p><font color="green"><strong>鸿蒙开发学习我建议直接上Ubuntu+VScode，不用切换系统搞来搞去的。</strong></font></p>
+<p>本文将介绍在Ubuntu+VScode环境下鸿蒙源码编译与烧录的全过程。（这里用的是在gitee拉取的工程，本文先不讲工程各个目录、文件的作用，先走一遍完整过程）</p>
+<p>鸿蒙开发者社区：<a href="https://device.harmonyos.com/cn/community/">https://device.harmonyos.com/cn/community/</a>，遇到问题除了百度、csdn搜索，还可以在这里搜索，很多开发者都会遇到类似的问题。</p>
+<p></p><div class="toc"><h3><center> 目录</center></h3><ul><li><a href="#1_14">1.获取源码</a></li><li><a href="#2_25">2.搭建开发环境</a></li><ul><li><a href="#21_DevEco_Device_Tool__37">2.1 DevEco Device Tool 安装</a></li><ul><li><a href="#211_Ubuntu_Shellbash_38">2.1.1 将Ubuntu Shell环境修改为bash</a></li><li><a href="#212_DevEco_Device_Tool_30_Release_Linux_56">2.1.2 下载DevEco Device Tool 3.0 Release Linux版本。</a></li></ul><li><a href="#22__78">2.2 导入工程</a></li><li><a href="#23__94">2.3 工程配置（重点）</a></li><ul><li><a href="#231_99">2.3.1工具链构建</a></li><li><a href="#232__115">2.3.2 编译器下载与配置</a></li><li><a href="#233_w800_147">2.3.3 w800执行配置</a></li></ul></ul><li><a href="#3_163">3.编译与下载</a></li><ul><li><a href="#31_Build_174">3.1 Build</a></li><li><a href="#32_Upload_200">3.2 Upload</a></li><li><a href="#33_Monitor_229">3.3 Monitor</a></li></ul></ul></div><p></p>
+<h1><a id="1_14"></a>1.获取源码</h1>
+<p>我的开发板是<font color="red"><strong>Neptune w800</strong></font>，是HiHope公司（润和软件）的，直接去他们gitee的仓库拉取代码。</p>
+<p>地址：</p>
+<pre><code class="prism language-bash">https://gitee.com/hihopeorg_group/neptune-harmony-os1.1-iot
+</code></pre>
+<p>下载后解压放到合适位置就先不用管了：</p>
+<p><img src="https://img-blog.csdnimg.cn/3265e5aa57014933ab87f2e1acf65126.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5oSf6LCi5Zyw5b-D5byV5Yqb,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h1><a id="2_25"></a>2.搭建开发环境</h1>
+<p>这里是在vscode中使用DevEco Device Tool ，工具链（gn、hc-gen、ninja）都会在下载DevEco Device Tool 的时候一并下载好，位置在：</p>
+<blockquote>
+<p>/home/jaychou/.deveco-device-tool</p>
+</blockquote>
+<p>后面在工程配置的时候还会说到。</p>
+<p>如果你在命令行编译就要参考我上一篇文章进行环境配置了。</p>
+<p>除此之外：<font color="green"><strong>VSCode和Python3.8是必需的</strong></font>，python3.8在ubunut20.04中本来就有，vscode下载安装就行了。</p>
+<h2><a id="21_DevEco_Device_Tool__37"></a>2.1 DevEco Device Tool 安装</h2>
+<h3><a id="211_Ubuntu_Shellbash_38"></a>2.1.1 将Ubuntu Shell环境修改为bash</h3>
+<ol>
+<li>执行如下命令，确认输出结果为bash。如果输出结果不是bash，请根据步骤2，将Ubuntu shell修改为bash。</li>
+</ol>
+<pre><code class="prism language-bash"><span class="token function">ls</span> -l /bin/sh
+</code></pre>
+<pre><code class="prism language-bash">jaychou@jaychou-TM1705:~$ <span class="token function">ls</span> -l /bin/sh
+lrwxrwxrwx <span class="token number">1</span> root root <span class="token number">4</span> <span class="token number">4</span>月   <span class="token number">8</span> <span class="token number">15</span>:56 /bin/sh -<span class="token operator">&gt;</span> <span class="token function">bash</span>
+</code></pre>
+<ol start="2">
+<li>打开终端工具，执行如下命令，输入密码，然后选择No，将Ubuntu shell由dash修改为bash。</li>
+</ol>
+<pre><code class="prism language-bash"><span class="token function">sudo</span> dpkg-reconfigure dash
+</code></pre>
+<h3><a id="212_DevEco_Device_Tool_30_Release_Linux_56"></a>2.1.2 下载DevEco Device Tool 3.0 Release Linux版本。</h3>
+<p>地址：<a href="https://device.harmonyos.com/cn/develop/ide#download">DevEco Device Tool 3.0 Release Linux</a></p>
+<ol>
+<li>解压：</li>
+</ol>
+<pre><code class="prism language-bash"><span class="token function">unzip</span> devicetool-linux-tool-3.0.0.400.zip
+</code></pre>
+<ol start="2">
+<li>赋予可操作权限：</li>
+</ol>
+<pre><code class="prism language-bash"><span class="token function">chmod</span> <span class="token number">777</span> devicetool-linux-tool-3.0.0.400.sh
+</code></pre>
+<ol start="3">
+<li>安装：</li>
+</ol>
+<pre><code class="prism language-bash"><span class="token function">sudo</span> ./devicetool-linux-tool-3.0.0.400.sh -- --install-plugins
+</code></pre>
+<p>安装成功，界面输出“Deveco Device Tool successfully installed.”。</p>
+<ol start="4">
+<li>打开vscode查看：<br>
+<img src="https://img-blog.csdnimg.cn/8a16320c604a4dc4a7ad7cde45f63925.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5oSf6LCi5Zyw5b-D5byV5Yqb,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></li>
+</ol>
+<h2><a id="22__78"></a>2.2 导入工程</h2>
+<ol>
+<li>打开DevEco Device Tool，进入Home页，点击<strong>Import Project</strong>打开工程<br>
+<img src="https://img-blog.csdnimg.cn/0cf534b3d76a45c19ef345b974edcb6b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5oSf6LCi5Zyw5b-D5byV5Yqb,size_20,color_FFFFFF,t_70,g_se,x_16" alt="在这里插入图片描述"></li>
+<li>选择待打开的工程目录，点击<strong>Import</strong>打开。<br>
+<img src="https://img-blog.csdnimg.cn/38aa934a50f2456f8af979a91090267d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5oSf6LCi5Zyw5b-D5byV5Yqb,size_16,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></li>
+<li>打开的目录不是DevEco Device Tool工程，则会出现如下提示框，点击<strong>Import</strong>。<br>
+<img src="https://img-blog.csdnimg.cn/df18ac49bde04a40a93e39bb5b84cb93.png" alt="在这里插入图片描述"></li>
+<li>在Select Project type界面，选择<strong>Import from OpenHarmony Source</strong>。<br>
+<img src="https://img-blog.csdnimg.cn/fed257c269954d389c11dbff3a06d346.png" alt="在这里插入图片描述"></li>
+<li>在Import Project界面，选择Product后，会自动填充对应的MCU、Board、company和kernel信息，然后ohosVersion选择对应的OpenHarmony源码版本。(我的已经打开过了，不用选，这里放的是鸿蒙官网HI386的开发版，操作都是类似的)<img src="https://img-blog.csdnimg.cn/5af5441952c64613b823a025cf17a0d8.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5oSf6LCi5Zyw5b-D5byV5Yqb,size_20,color_FFFFFF,t_70,g_se,x_16" alt="在这里插入图片描述"></li>
+<li>点击Open打开工程或源码。<br>
+<img src="https://img-blog.csdnimg.cn/49e84d8a23364c3da94993f51deee5e2.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5oSf6LCi5Zyw5b-D5byV5Yqb,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></li>
+</ol>
+<h2><a id="23__94"></a>2.3 工程配置（重点）</h2>
+<p>如图，在VSCode左侧菜单栏点击<strong>DevEco——Quick Access——主界面——工程设置</strong>，出现下面的配置界面。</p>
+<p><img src="https://img-blog.csdnimg.cn/b228c15f82c64026a4f0a65738519075.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5oSf6LCi5Zyw5b-D5byV5Yqb,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3><a id="231_99"></a>2.3.1工具链构建</h3>
+<p>工具链存放路径是默认设置好的，在那个目录下存放着如下工具：</p>
+<p><img src="https://img-blog.csdnimg.cn/c8c3b56d4df74282a8e258a80b82b166.png#pic_center" alt="在这里插入图片描述"><br>
+之前的文章有简介，此处不再重复。这一步一般不用你设置。</p>
+<p>OpenHarmony版本选1.x，根据实际选择即可。</p>
+<p>产品是wifiiot的，这些一般都不需要多余配置。</p>
+<p>接下来是构建OpenHarmony的工具链，点击详情，可以看到鸿蒙需要的各种包如下，类型也不尽相同，有deb、pip等等，如果安装好了，就像下面一样status显示valid，否则是红色的<font color="red"><strong>invalid</strong></font>。</p>
+<p><img src="https://img-blog.csdnimg.cn/4fdacc45a09848c48adb1ccdbc6409ae.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5oSf6LCi5Zyw5b-D5byV5Yqb,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+如果缺少包，点击下面的安装按钮，即可自动在线安装。可能会有部分包安装失败，需要自己手动安装。我当时是python的2个包，解决方法如下：</p>
+<p><a href="https://blog.csdn.net/weixin_43764974/article/details/124061186?spm=1001.2014.3001.5502">Python安装 scons、pycryptodome等各种库很慢、安装失败</a></p>
+<h3><a id="232__115"></a>2.3.2 编译器下载与配置</h3>
+<p>再往下，就是编译器的路径配置了。Neptune  w800使用的是<font color="green"><strong>国产指令集c-sky</strong></font>(可自行百度)，不同于一般arm芯片的RISC精简指令集。所以需要下载对应的编译器。</p>
+<p>编译器资源在平头哥的网站：<a href="https://occ.t-head.cn/community/download">https://occ.t-head.cn/community/download</a>，进去选择 工具 - 工具链-800 Series 中相应的版本。</p>
+<p>名称：csky-elfabiv2-tools-x86_64-minilibc-xxxxx.tar.gz</p>
+<p>下载完成后将工具包拷贝到相应的目录下，我的是：~/HarmonyOS_Tool（我试用命令行编译方式的时候工具的存放目录）</p>
+<p>解压：(注意你的压缩包名字)</p>
+<pre><code class="prism language-bash"><span class="token function">tar</span> xzvf csky-elfabiv2-tools-x86_64-minilibc-20210423.tar.gz
+</code></pre>
+<p>在~/.bashrc文件添加环境变量（根据你的路径来）：</p>
+<pre><code class="prism language-bash"><span class="token function">sudo</span> gedit ~/.bashrc
+</code></pre>
+<pre><code class="prism language-bash"><span class="token builtin class-name">export</span> <span class="token assign-left variable"><span class="token environment constant">PATH</span></span><span class="token operator">=~</span>/HarmonyOS_Tool/csky-elfabiv2-tools-x86_64-minilibc-20210423/bin:<span class="token environment constant">$PATH</span>
+</code></pre>
+<p>刷新环境变量：</p>
+<pre><code class="prism language-bash"><span class="token builtin class-name">source</span> ~/.bashrc
+</code></pre>
+<p>回到vscode中选择相同的目录：<br>
+<img src="https://img-blog.csdnimg.cn/b4281560f09b4f8ab142760e61348cd1.png#pic_center" alt="在这里插入图片描述"></p>
+<h3><a id="233_w800_147"></a>2.3.3 w800执行配置</h3>
+<p>上面都是toolchain下面的配置，接着对w800选项进行配置。需要设置的有：</p>
+<p><font color="orange"><strong>build_type</strong>:</font>默认为debug<br>
+<font color="orange"><strong>upload_partitions</strong>：</font>选择待烧录的文件名称。<br>
+<font color="orange"><strong>upload_port</strong>：</font>选择烧录的串口（下面马上讲）。<br>
+<font color="orange"><strong>upload_protocol</strong>：</font>选择烧录协议，固定选择“xmodem”。</p>
+<p><img src="https://img-blog.csdnimg.cn/b9017af74caa43f4874a9057e2eac892.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5oSf6LCi5Zyw5b-D5byV5Yqb,size_18,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+怎么知道串口是哪个呢？如下（方法不唯一），可以看到在23：06分我的/dev/ttyUSB0上连接了开发版，上面的upload_port填写/dev/ttyUSB0即可。</p>
+<pre><code class="prism language-bash">jaychou@jaychou-TM1705:~$  <span class="token function">ls</span> -l /dev/ttyUSB*
+crw-rw-rw- <span class="token number">1</span> root dialout <span class="token number">188</span>, <span class="token number">0</span> <span class="token number">4</span>月   <span class="token number">9</span> <span class="token number">23</span>:06 /dev/ttyUSB0
+</code></pre>
+<h1><a id="3_163"></a>3.编译与下载</h1>
+<p>如图。<br>
+<font color="purple"><strong>clean</strong>：</font>清除之前编译的内容。<br>
+<font color="purple"><strong>build</strong>：</font>编译（只编译项目更改的内容，相对更快一点）。<br>
+<font color="purple"><strong>rebuild</strong>：</font>重新编译。<br>
+<font color="purple"><strong>upload</strong>：</font>烧录。<br>
+<font color="purple"><strong>monitor</strong>：</font>和串口助手这类工具类似，可以实时监视串口输出。</p>
+<p>下面按步骤进行说明。<br>
+<img src="https://img-blog.csdnimg.cn/314ebb9067ec4b0d8d880c7a3e4aa545.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5oSf6LCi5Zyw5b-D5byV5Yqb,size_10,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h2><a id="31_Build_174"></a>3.1 Build</h2>
+<p>在各种环境配置好之后，点击Build，可能会出现以下报错：<br>
+<img src="https://img-blog.csdnimg.cn/946a1d199581417c900d2533b214c220.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5oSf6LCi5Zyw5b-D5byV5Yqb,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+找不到clang编译器，解决方法：</p>
+<p>下载llvm安装包：</p>
+<pre><code class="prism language-bash"><span class="token function">sudo</span> <span class="token function">wget</span> https://repo.huaweicloud.com/harmonyos/compiler/clang/9.0.0-36191/linux/llvm-linux-9.0.0-36191.tar
+</code></pre>
+<p>解压，我是复制到前面说过的/HarmonyOS_ToolHarmonyOS_Tool文件夹下面才解压的：</p>
+<pre><code class="prism language-bash"><span class="token function">sudo</span> <span class="token function">tar</span> -xvf llvm-linux-9.0.0-36191.tar 
+</code></pre>
+<p>同样的，在环境变量中添加路径：</p>
+<pre><code class="prism language-bash"><span class="token builtin class-name">export</span> <span class="token assign-left variable"><span class="token environment constant">PATH</span></span><span class="token operator">=~</span>/HarmonyOS_Tool/llvm/bin:<span class="token environment constant">$PATH</span>
+</code></pre>
+<p>再刷新环境变量就可以了。</p>
+<p>再次编译：</p>
+<p><img src="https://img-blog.csdnimg.cn/f6bf9ae94114448c908304f0ddc45d63.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5oSf6LCi5Zyw5b-D5byV5Yqb,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h2><a id="32_Upload_200"></a>3.2 Upload</h2>
+<p>编译完成之后，插上开发版，点击Upload，可能会出现下面报错：<br>
+<img src="https://img-blog.csdnimg.cn/2b1f013d123f4eeabf0cd5c65ff76fa5.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5oSf6LCi5Zyw5b-D5byV5Yqb,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+即打不开对应的端口，为什么呢？</p>
+<p>来到linux，最敏感的一个东西就是文件的权限了：读、写、执行。<br>
+来我给/dev/ttyUSB0权限不就OK了？直接最高权限（滑稽）</p>
+<pre><code class="prism language-bash"><span class="token function">sudo</span> <span class="token function">chmod</span> <span class="token number">777</span> /dev/ttyUSB0
+</code></pre>
+<p>再次烧录，确实OK了。但下一次烧写就有不行了，我不能每一次都赋予一遍权限吧。</p>
+<p>我直接给USB to TTL设备权限：通过增加udev规则来实现，步骤如下：</p>
+<pre><code class="prism language-bash"><span class="token function">sudo</span> gedit /etc/udev/rules.d/70-ttyusb.rules
+</code></pre>
+<p>在文件内增加一行</p>
+<pre><code class="prism language-bash"><span class="token assign-left variable">KERNEL</span><span class="token operator">==</span><span class="token string">"ttyUSB[0-9]*"</span>, <span class="token assign-left variable">MODE</span><span class="token operator">=</span><span class="token string">"0666"</span>
+</code></pre>
+<p>重新插入，直接一劳永逸。</p>
+<p>成功烧录：（按照提示按一下板子上的reset）<br>
+<img src="https://img-blog.csdnimg.cn/141b2eb05e9b420485c5a8e1e104e08c.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5oSf6LCi5Zyw5b-D5byV5Yqb,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h2><a id="33_Monitor_229"></a>3.3 Monitor</h2>
+<p>点击Monitor，重启设备，看到输出：<br>
+<img src="https://img-blog.csdnimg.cn/ca9aecc220f148f1b6aa8a91e6a388a9.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5oSf6LCi5Zyw5b-D5byV5Yqb,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<hr>
+<font color="purple" size="8">遇到困难？欢迎评论！</font>
+</div>
+</body>
+
+</html>
