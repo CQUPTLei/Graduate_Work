@@ -1,5 +1,4 @@
-# [
-    HiHope-Neptune](https://gitee.com/hihope-neptune) W800开发板
+# [ HiHope-Neptune](https://gitee.com/hihope-neptune) W800开发板
 
 完整官方文档：[Link](https://device.harmonyos.com/cn/docs/documentation/guide/overview-harmonyos-0000001111162012)
 
@@ -7,7 +6,7 @@
 
 ## 1.1系统类型
 
-    HarmonyOS是一款面向全场景的分布式操作系统，采用组件化设计，支持在128KiB到xGiB RAM资源的设备上运行系统组件，设备开发者可基于目标硬件能力自由选择系统组件进行集成。
+    HarmonyOS是一款面向**全场景的分布式操作系统**，采用**组件化设计**，支持在128KiB到xGiB RAM资源的设备上运行系统组件，设备开发者可基于目标硬件能力自由选择系统组件进行集成。
 
     为了保证在不同硬件上集成的易用性，HarmonyOS当前定义了**三种基础系统类型**，设备开发者通过选择基础系统类型完成必选组件集配置后，便可实现其最小系统的开发。这三种基础系统类型的参考定义如下：
 
@@ -75,11 +74,9 @@ HarmonyOS是一款面向万物互联时代的、全新的分布式操作系统�
 
 []()[]()应用层包括系统应用和第三方非系统应用。HarmonyOS的应用由一个或多个FA（Feature Ability）或PA（Particle Ability）组成。其中，FA有UI界面，提供与用户交互的能力；而PA无UI界面，提供后台运行任务的能力以及统一的数据访问抽象。FA在进行用户交互时所需的后台数据访问也需要由对应的PA提供支撑。基于FA/PA开发的应用，能够实现特定的业务功能，支持跨设备调度与分发，为用户提供一致、高效的应用体验。
 
-
 ### 1.2.2 技术特性
 
 ### 1.2.3 系统安全
-
 
 ## 1.3 快速入门
 
