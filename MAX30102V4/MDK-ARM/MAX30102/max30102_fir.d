@@ -1,0 +1,12 @@
+max30102\max30102_fir.o: ..\Src\max30102_fir.c
+max30102\max30102_fir.o: ../Inc/max30102_fir.h
+max30102\max30102_fir.o: ../Drivers/CMSIS/Include/arm_math.h
+max30102\max30102_fir.o: ../Drivers/CMSIS/Include/core_cm3.h
+max30102\max30102_fir.o: E:\Keil_v5\ARM\ARMCC\bin\..\include\stdint.h
+max30102\max30102_fir.o: ../Drivers/CMSIS/Include/core_cmInstr.h
+max30102\max30102_fir.o: ../Drivers/CMSIS/Include/cmsis_armcc.h
+max30102\max30102_fir.o: ../Drivers/CMSIS/Include/core_cmFunc.h
+max30102\max30102_fir.o: E:\Keil_v5\ARM\ARMCC\bin\..\include\string.h
+max30102\max30102_fir.o: E:\Keil_v5\ARM\ARMCC\bin\..\include\math.h
+max30102\max30102_fir.o: ../Drivers/CMSIS/Include/arm_const_structs.h
+max30102\max30102_fir.o: ../Drivers/CMSIS/Include/arm_common_tables.h
