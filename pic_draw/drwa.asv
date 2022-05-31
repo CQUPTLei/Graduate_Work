@@ -1,0 +1,9 @@
+close all
+clear
+clc
+
+data = xlsread('data');
+
+pie3(data)
+
+legend('苹果','小米','三星','华为','Imagine Marketing','其他');

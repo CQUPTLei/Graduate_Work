@@ -1,0 +1,28 @@
+close all
+clear
+clc
+
+data=xlsread('light.xls');
+data1=xlsread('light1.xls');
+
+p1=plot(data(:,1),data(:,2));
+hold on
+grid on
+p2=plot(data1(:,1),data1(:,2));
+
+p1.LineWidth = 1.5;
+p1.Color='#00CD00';
+p1.LineStyle='--';
+
+p2.LineWidth = 1.5;
+p2.Color='#FF8C00';
+p2.LineStyle='--';
+
+xlabel('波长(nm)');
+ylabel('吸光系数');
+text(990,0.45,'HbO_2','FontWeight','bold')
+text(990,0.35,'Hb','FontWeight','bold')
+
+y1=0:0.1:1.2;
+x1=
+plot(660,0,660,1.2,'--')
