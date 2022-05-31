@@ -7,6 +7,22 @@
 #除中文注释外为ignore模板
 private
 
+# Windows
+[Dd]esktop.ini
+Thumbs.db
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+
+# Node.js
+node_modules/
+
+
 # User-specific files
 *.rsuser
 *.suo
