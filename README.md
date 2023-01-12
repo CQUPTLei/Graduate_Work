@@ -1,5 +1,7 @@
 # 毕设文档仓库
 
+[![Security Status](https://www.murphysec.com/platform3/v3/badge/1612402533738250240.svg?t=1)](https://www.murphysec.com/accept?code=3593281b1f05ecaaf267bc10725f9e48&type=1&from=2&t=2)
+
 本仓库是我的毕设文档仓库，内容包括：
 
 1. 相关参考文献；
